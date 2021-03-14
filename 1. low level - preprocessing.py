@@ -63,7 +63,7 @@ def blackAndWhiteinatorOld(filename):
                     image_bw[height][width] = [255, 255, 255, 255] if image_bw[height][width][:3].mean() >= bw_threshold else [0, 0, 0, 255]
 
     displayImage(image_bw)
-    # return image_bw
+    return image_bw
 
 def blackAndWhiteinator(filename):
     image = I.open(imgFilename) # Open with Pillow Image
@@ -76,13 +76,13 @@ def blackAndWhiteinator(filename):
         for j in range(width):
             image_bw[i][j] = [255, 255, 255] if image_arr[i][j].mean() >= bw_threshold else [0, 0, 0]
 
-    # displayImage(image_bw)
+    displayImage(image_bw)
     return image_bw
 
 
-# imgFilename = 'test/koala.jpeg'
-imgFilename = 'dataset/images/maksssksksss1.png'
-# printAsArray(imgFilename)
+imgFilename = 'test/koala.jpeg'
+# imgFilename = 'dataset/images/maksssksksss0.png'
+# imgFilename = 'dataset/images/maksssksksss1.png'
 
 def measureTimeDiff(): # don't forget to comment the displaying of the images
     import time
@@ -96,4 +96,5 @@ def measureTimeDiff(): # don't forget to comment the displaying of the images
     t = (time.time() -ts)
     print("New Algo: {:} ms".format(t*1000))
 
+# measureTimeDiff()
 blackAndWhiteinator(imgFilename)
