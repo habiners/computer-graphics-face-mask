@@ -4,6 +4,7 @@ import PIL # need to do -> pip install Pillow
 print('Pillow Version:', PIL.__version__) # This should run to make sure you have pillow installed
 
 from PIL import Image as I
+from PIL import ImageFilter
 
 from matplotlib import image as MI
 from matplotlib import pyplot
@@ -36,6 +37,16 @@ def displayImage(image): # NOT filename, needs to be an image/arr jud!
     pyplot.imshow(image) # load it for pyplot.show()
     pyplot.show() # display the array of pixels as an image
 
+def displayTwoImages(image, image2): # NOT filename, needs to be an image/arr jud!
+    fig = pyplot.figure()
+    fig.add_subplot(121)
+    pyplot.title('Original')
+    pyplot.imshow(image)
+    fig.add_subplot(122)
+    pyplot.title('Filtered')
+    pyplot.imshow(image2)
+    pyplot.show()
+
 def write3dMatrixToTxt(filename):
     image = MI.imread(filename) # read by matplotlib instead of Pillow, so it's array lahos kinda
     print("This may take a while...")
@@ -44,57 +55,69 @@ def write3dMatrixToTxt(filename):
     resultTxt.write(image.__repr__()) # image.__repr__ converts the array into string
     resultTxt.close()
     print("Done!")
-    height, width, channels = image_arr.shape
 
-def blackAndWhiteinatorOld(filename):
+def imgToNumpyarr(filename):
     image = I.open(imgFilename) # Open with Pillow Image
-    image_arr = numpy.asarray(image) # Convert to numpy array
+    return numpy.asarray(image) # Convert to numpy array
 
-    # given a 800x450 image, the size of the arrays are arr[450][800][3]
-    # this means first index is prolly height, 2nd index is width and final index is channel
-    image_bw = image_arr.copy() # make a copy of the array so that they don't point to same reference since pic is read-only
-    bw_threshold = 128 # set it higher to be more strict (color needs to be brighter) if when mu black
-    for height in range(len(image_bw)):
-        for width in range(len(image_bw[height])):
-            for channels in range(len(image_bw[height][width])):
-                if len(image_bw[height][width]) == 3:
-                    image_bw[height][width] = [255, 255, 255] if image_bw[height][width].mean() >= bw_threshold else [0, 0, 0]
-                elif len(image_bw[height][width]) == 4: # naay alpha channel
-                    image_bw[height][width] = [255, 255, 255, 255] if image_bw[height][width][:3].mean() >= bw_threshold else [0, 0, 0, 255]
+def gaussianBlur(filename, blur):
+    image = I.open(imgFilename) # Open with Pillow Image
+    return numpy.asarray(image.filter(ImageFilter.GaussianBlur(blur)))
 
-    displayImage(image_bw)
+def blackAndWhiteinator(image_arr, bw_threshold=128): # set threshold higher to be more strict (color needs to be brighter) if when mu black
+    height, width = image_arr.shape[:2]
+
+    image_bw = numpy.zeros((height, width, 3)) # create empty array composed of zero's
+    # image_bw = numpy.zeros((height, width)) # create empty array composed of zero's
+    for i in range(height):
+        for j in range(width):
+            if image_arr[i][j][:3].mean() >= bw_threshold:
+                # image_bw[i][j] = 1
+                image_bw[i][j] = [255, 255, 255] 
+
     return image_bw
 
-def blackAndWhiteinator(filename):
+def gaussianBlurToBW(filename, blur=5, bw_threshold=128):
+    return blackAndWhiteinator(gaussianBlur(filename, blur), bw_threshold)
+
+def grayscaleinator(filename):
     image = I.open(imgFilename) # Open with Pillow Image
     image_arr = numpy.asarray(image) # Convert to numpy array
     height, width = image_arr.shape[:2]
 
-    image_bw = numpy.zeros((height, width, 3)) # create empty array composed of zero's
-    bw_threshold = 128 # set it higher to be more strict (color needs to be brighter) if when mu black
+    # image_gray = numpy.zeros((height, width)) # create empty array composed of zero's
+    image_gray = numpy.zeros((height, width, 3)) # create empty array composed of zero's
     for i in range(height):
         for j in range(width):
-            image_bw[i][j] = [255, 255, 255] if image_arr[i][j].mean() >= bw_threshold else [0, 0, 0]
+            # image_gray[i][j][1] = image_arr[i][j][1]
+            image_gray[i][j] = (numpy.multiply(image_arr[i][j][:3], [0.2989, 0.5870, 0.1140]))
+            # image_gray[i][j] = numpy.sum(numpy.multiply(image_arr[i][j][:3], [0.2989, 0.5870, 0.1140]))
 
-    displayImage(image_bw)
-    return image_bw
+    # print(image_gray)
+    return image_gray
 
 
 imgFilename = 'test/koala.jpeg'
+# imgFilename = 'test/test.jpg'
 # imgFilename = 'dataset/images/maksssksksss0.png'
 # imgFilename = 'dataset/images/maksssksksss1.png'
 
-def measureTimeDiff(): # don't forget to comment the displaying of the images
+def measureTimeDiff(func1, func2): # pass the functions with lambda, eg lambda: blackAndWhiteinator(imgFilename)
     import time
     ts = time.time()
-    blackAndWhiteinatorOld(imgFilename)
+    func1()
     t = (time.time() -ts)
-    print("Old Algo: {:} ms".format(t*1000))
+    print("Algo 1: {:} ms".format(t*1000))
 
     ts = time.time()
-    blackAndWhiteinator(imgFilename)
+    func2()
     t = (time.time() -ts)
-    print("New Algo: {:} ms".format(t*1000))
+    print("Algo 2: {:} ms".format(t*1000))
 
-# measureTimeDiff()
-blackAndWhiteinator(imgFilename)
+# measureTimeDiff(lambda: gaussianBlurToBW(imgFilename, 3), lambda: blackAndWhiteinator(imgToNumpyarr(imgFilename)))
+# displayImage(gaussianBlur(imgFilename, 3))
+# displayImage(blackAndWhiteinator(imgFilename))
+displayImage(gaussianBlurToBW(imgFilename, 2, 150))
+
+# displayTwoImages(grayscaleinator(imgFilename), blackAndWhiteinator(imgFilename))
+# displayTwoImages(gaussianBlurToBW(imgFilename, 1), blackAndWhiteinator(imgToNumpyarr(imgFilename)))
