@@ -23,8 +23,9 @@ each edge has a gaussian approximation
 > if edge approx is HIGH and above, it is drawn
 
 NOTE
+
 Uses Pillow. So pls use pillow too to avoid complications
-Gaussian blur is yet to be implemented manually (currently using package)
+Gaussian blur is yet to be implemented manually (currently using packag idk if this is ok)
 BMP files when converted to numpy array only contains False as its cells' value. I commented the code that recreates this error below
 
 """
@@ -72,8 +73,6 @@ class ImageEdge:
         
         img = self.getImageArray()
         arr = np.asarray(img)
-
-        print(arr)
 
         height, width, n = arr.shape
         res = x_res = y_res = np.zeros((height, width, 3))
@@ -142,7 +141,7 @@ class ImageEdge:
         return res
 
 
-edge = ImageEdge('test/test.png', 1, 0.05, 0.1)
+edge = ImageEdge('test/test.png', 1, 0.15, 0.2)
 
 # TESTING EDGE
 P.imshow(edge.getImageEdge())
