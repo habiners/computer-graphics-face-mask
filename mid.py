@@ -31,10 +31,12 @@ BMP files when converted to numpy array only contains False as its cells' value.
 """
 
 class ImageEdge:
-    def __init__(self, filename, blur = 1, low = 0.1, high = 0.2):
+    def __init__(self, filename, blur = 1, low = 0.1, high = 0.2,weak_pixel = 75, strong_pixel = 255):
         self.raw = I.open(filename)
         self._low = low
         self._high = high
+        self._weak_pixel = weak_pixel
+        self._strong_pixel = strong_pixel
 
     # returns the Pillow Image file
     def getImage(self): 
@@ -53,9 +55,10 @@ class ImageEdge:
     def getImageEdge(self):
         img = self.getImage().convert('LA').filter(ImageFilter.GaussianBlur(radius=1))
         res, x, y, theta = self._sobel()
-        res2 = self._suppress(res, theta)
+        res2 = self._suppress(res, theta) 
         res3 = self._double_thresh(res2)
-        return res3
+        final_img = self._hysteresis(res3)
+        return final_img
     
     # underscore functions are meant to be private
     def _sobel(self):
@@ -139,9 +142,27 @@ class ImageEdge:
                         res[x][y] = [0] * 3
         
         return res
+    def _hysteresis(self,img): # final process for canny edge detection, converting "weak" pixels into strong ones
+        M,N,go = img.shape 
+        weak = self._weak_pixel
+        strong = self._strong_pixel 
+        for i in range(1,M-1):
+            for j in range(1,N-1):
+                if(img[i][j][0] == 0):
+                    #checking the surrounding pixels if it's "strong" or "weak"
+                    if ((img[i+1][j-1][0] == strong) or (img[i+1][j][0].size == strong) or (img[i+1][j+1][0] == strong)
+                        or (img[i][j-1][0] == strong) or (img[i][j+1][0] == strong)
+                        or (img[i-1][j-1][0] == strong) or (img[i-1][j][0] == strong) or (img[i-1][j+1][0] == strong)):
+                        img[i][j][0] = strong
+                    else:
+                        img[i][j][0] = 0
+                  
+        return img
 
 
-edge = ImageEdge('test/test.png', 1, 0.15, 0.2)
+
+
+edge = ImageEdge('test.png', 1, 0.15, 0.2,75,255)
 
 # TESTING EDGE
 P.imshow(edge.getImageEdge())
