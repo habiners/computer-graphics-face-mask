@@ -2,7 +2,7 @@ import PIL, PIL.Image as I
 from PIL import Image, ImageOps
 import numpy as np
 from matplotlib import pyplot as P
-import Preprocessing as pre 
+import Preprocessing as pre # mo run first tong unsa ang naa sa Preprocessing.py
 """
 This class uses canny edge detection under the hood
 
@@ -146,13 +146,13 @@ class ImageEdge:
         
         return res
 
-    def _hysteresis(self,img):
+    def _hysteresis(self,img): #
         M,N,go = img.shape 
         weak = self._weak_pixel
         strong = self._strong_pixel 
         for i in range(1,M-1):
             for j in range(1,N-1):
-                if(img[i][j][0] == 0):
+                if(img[i][j][0] == 0): #checking all neighbors
                     if ((img[i+1][j-1][0] == strong) or (img[i+1][j][0].size == strong) or (img[i+1][j+1][0] == strong)
                         or (img[i][j-1][0] == strong) or (img[i][j+1][0] == strong)
                         or (img[i-1][j-1][0] == strong) or (img[i-1][j][0] == strong) or (img[i-1][j+1][0] == strong)):
@@ -166,7 +166,7 @@ class ImageEdge:
         #  img = ImageOps.grayscale(img)
         #img = ImageOps.grayscale(img) # to use javin code here
         img = np.asarray(img)
-        img = pre.grayscaleinator(img)
+        img = pre.grayscaleinator(img) #javin's grayscale function
         userSigma = self._blur
         userMaskX = userMaskY = 5
 
