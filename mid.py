@@ -1,8 +1,6 @@
-import PIL, PIL.Image as I, PIL.ImageFilter as ImageFilter
+import PIL, PIL.Image as I
 from PIL import Image, ImageOps
 import numpy as np
-from skimage import io
-import skimage
 from matplotlib import pyplot as P
 
 """
@@ -36,6 +34,7 @@ BMP files when converted to numpy array only contains False as its cells' value.
 class ImageEdge:
     def __init__(self, filename, blur = 1, low = 0.1, high = 0.2,weak_pixel = 75, strong_pixel = 255):
         self.raw = I.open(filename)
+        self._blur = blur
         self._low = low
         self._high = high
         self._weak_pixel = weak_pixel
@@ -56,7 +55,8 @@ class ImageEdge:
     # returns numpy array in the shape of [height][width][3]
     # the [3] of this array is the [r,g,b] values of the edges
     def getImageEdge(self):
-        img = self.getImage().convert('LA').filter(ImageFilter.GaussianBlur(radius=1))
+        img = self.getImage()
+        img = self._filter(img)
         res, x, y, theta = self._sobel()
         res2 = self._suppress(res, theta) 
         res3 = self._double_thresh(res2)
@@ -145,14 +145,14 @@ class ImageEdge:
                         res[x][y] = [0] * 3
         
         return res
-    def _hysteresis(self,img): # final process for canny edge detection, converting "weak" pixels into strong ones
+
+    def _hysteresis(self,img):
         M,N,go = img.shape 
         weak = self._weak_pixel
         strong = self._strong_pixel 
         for i in range(1,M-1):
             for j in range(1,N-1):
                 if(img[i][j][0] == 0):
-                    #checking the surrounding pixels if it's "strong" or "weak"
                     if ((img[i+1][j-1][0] == strong) or (img[i+1][j][0].size == strong) or (img[i+1][j+1][0] == strong)
                         or (img[i][j-1][0] == strong) or (img[i][j+1][0] == strong)
                         or (img[i-1][j-1][0] == strong) or (img[i-1][j][0] == strong) or (img[i-1][j+1][0] == strong)):
@@ -162,74 +162,55 @@ class ImageEdge:
                   
         return img
 
+    def _filter(self, img):
+        img = ImageOps.grayscale(img) # to use javin code here
+        img = np.asarray(img)
+        userSigma = self._blur
+        userMaskX = userMaskY = 5
+
+        def applyFilter (image, mask):
+            row, col = image.shape
+            m,n = mask.shape
+            new = np.zeros((row+m-1, col+n-1))
+            n = n//2
+            m = m//2
+            filteredImage = np.zeros((row, col, 3))
+            new[m:new.shape[0] - m, n:new.shape[1] - n] = image
+            for i in range(m, new.shape[0]- m):
+                for j in range(n, new.shape[1]-n):
+                    temp = new[i-m:i+m+1, j-m:j+m+1]
+                    result = temp*mask
+                    filteredImage[i-m,j-n] = [result.sum()] * 3
+        
+            return filteredImage# filter application
+
+        def gaussianFormula(m, n, sigma):
+            gaussian = np.zeros((m,n))
+            m = m//2
+            n = n//2
+            for x in range(-m, m+1):
+                for y in range(-n, n+1):
+                    x1 = sigma*(np.pi)**2
+                    x2 = np.exp(-(x**2 + y**2)/(2*sigma**2))
+                    gaussian[x+m, y+n] = (1/x1)*x2
+            return gaussian# filter formula
+
+        newImage = applyFilter(img, gaussianFormula(int(userMaskX),int(userMaskY),int(userSigma)))
+        return newImage
 
 
-
-edge = ImageEdge('test.png', 1, 0.15, 0.2,75,255)
 
 # TESTING EDGE
-P.imshow(edge.getImageEdge())
+edge = ImageEdge('test/test.png', 1, 0.15, 0.2,75,255)
+res, res2 = edge.getImageEdge()
+P.imshow(res)
 P.show()
 
+P.imshow(res2)
+P.show()
 
 # RECREATE BMP ERROR
 # edge = ImageEdge('test/koala bw via paint.bmp', 1, 0.05, 0.1)
 # P.imshow(edge.getImageArray())
 # P.show()
-
-
-
-# ------------------------------------------------------------------------------------------
-# CODE FOR MANUAL GAUSSIAN FILTERING (TO BE MODIFIED)
-# Issues: must use Pillow for compatibility
-
-imgFileName = input("Enter Image File Name: ")
-try:
-    f = open(imgFileName)
-    userMaskX = input("Enter Mask: ")
-    userMaskY = input("by: ")
-    userSigma = input("Enter Sigma: ")
-    oldImage = Image.open(imgFileName)
-    oldImage = ImageOps.grayscale(oldImage)
-    oldImage = np.array(oldImage)
-    # file opening
-
-    def applyFilter (image, mask):
-        row, col = image.shape
-        m,n = mask.shape
-        new = np.zeros((row+m-1, col+n-1))
-        n = n//2
-        m = m//2
-        filteredImage = np.zeros(image.shape)
-        new[m:new.shape[0] - m, n:new.shape[1] - n] = image
-        for i in range(m, new.shape[0]- m):
-            for j in range(n, new.shape[1]-n):
-                temp = new[i-m:i+m+1, j-m:j+m+1]
-                result = temp*mask
-                filteredImage[i-m,j-n] = result.sum()
-    
-        return filteredImage# filter application
-
-    def gaussianFormula(m, n, sigma):
-        gaussian = np.zeros((m,n))
-        m = m//2
-        n = n//2
-        for x in range(-m, m+1):
-            for y in range(-n, n+1):
-                x1 = sigma*(np.pi)**2
-                x2 = np.exp(-(x**2 + y**2)/(2*sigma**2))
-                gaussian[x+m, y+n] = (1/x1)*x2
-        return gaussian# filter formula
-
-    newImage = applyFilter(oldImage, gaussianFormula(int(userMaskX),int(userMaskY),int(userSigma)))
-    P.imshow(oldImage,cmap = "gray")
-    P.title("Old Image")
-    P.figure()
-    P.imshow(newImage,cmap = "gray")
-    P.title("New Image")
-    P.show()
-except IOError:
-    print("File not accessible")
-
-
 
