@@ -201,13 +201,11 @@ class ImageEdge:
 
 
 # TESTING EDGE
-edge = ImageEdge('test/test.png', 1, 0.15, 0.2,75,255)
-res, res2 = edge.getImageEdge()
-P.imshow(res)
-P.show()
+# edge = ImageEdge('test/test.png', 1, 0.15, 0.2,75,255)
+# res = edge.getImageEdge()
+# P.imshow(res)
+# P.show()
 
-P.imshow(res2)
-P.show()
 
 # RECREATE BMP ERROR
 # edge = ImageEdge('test/koala bw via paint.bmp', 1, 0.05, 0.1)
