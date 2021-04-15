@@ -25,7 +25,7 @@ def getImageInformationUsingMatPlotLib(filename):
     print(f"Image Shape: {image.shape}")
 
 def printAsArray(filename):
-    image = I.open(imgFilename) # Open with Pillow Image
+    image = I.open(filename) # Open with Pillow Image
     image_arr = numpy.asarray(image) # Convert to numpy array
     print(image_arr)
 
@@ -37,14 +37,15 @@ def displayImage(image): # NOT filename, needs to be an image/arr jud!
     pyplot.imshow(image) # load it for pyplot.show()
     pyplot.show() # display the array of pixels as an image
 
-def displayTwoImages(image, image2): # NOT filename, needs to be an image/arr jud!
+def displayMultipleImages(*images):
+    foo = len(images)
+    bazz = 1
     fig = pyplot.figure()
-    fig.add_subplot(121)
-    pyplot.title('Original')
-    pyplot.imshow(image)
-    fig.add_subplot(122)
-    pyplot.title('Filtered')
-    pyplot.imshow(image2)
+    for image in images:        
+        fig.add_subplot(100 + foo * 10 + bazz)
+        pyplot.title('Image ' + str(bazz))
+        pyplot.imshow(image)
+        bazz += 1
     pyplot.show()
 
 def write3dMatrixToTxt(filename):
@@ -57,44 +58,61 @@ def write3dMatrixToTxt(filename):
     print("Done!")
 
 def imgToNumpyarr(filename):
-    image = I.open(imgFilename) # Open with Pillow Image
+    image = I.open(filename) # Open with Pillow Image
     return numpy.asarray(image) # Convert to numpy array
 
-def gaussianBlur(filename, blur):
-    image = I.open(imgFilename) # Open with Pillow Image
+def pilImgToNumpyarr(pil_img):
+    return numpy.asarray(pil_img) # Convert to numpy array
+
+def numpyarrToPilImg(image_arr):
+    return I.fromarray(image_arr.astype('uint8'), 'RGB')
+
+def gaussianBlur(filename, blur=5):
+    image = I.open(filename) # Open with Pillow Image
+    return numpy.asarray(image.filter(ImageFilter.GaussianBlur(blur)))
+
+def gaussianBlurArr(image_arr, blur=5): # if from numpy array
+    image = numpyarrToPilImg(image_arr)
     return numpy.asarray(image.filter(ImageFilter.GaussianBlur(blur)))
 
 def blackAndWhiteinator(image_arr, bw_threshold=128): # set threshold higher to be more strict (color needs to be brighter) if when mu black
     height, width = image_arr.shape[:2]
+    rgb = True if len(image_arr.shape) >= 3 else False
 
     image_bw = numpy.zeros((height, width, 3)) # create empty array composed of zero's
-    # image_bw = numpy.zeros((height, width)) # create empty array composed of zero's
-    for i in range(height):
-        for j in range(width):
-            if image_arr[i][j][:3].mean() >= bw_threshold:
-                # image_bw[i][j] = 1
-                image_bw[i][j] = [255, 255, 255] 
+    if rgb:
+        for i in range(height):
+            for j in range(width):
+                if image_arr[i][j][:3].mean() >= bw_threshold:
+                    image_bw[i][j] = [255, 255, 255]
+    else:
+        for i in range(height):
+            for j in range(width):
+                if image_arr[i][j] >= bw_threshold:
+                    image_bw[i][j] = [255, 255, 255]
 
     return image_bw
 
 def gaussianBlurToBW(filename, blur=5, bw_threshold=128):
     return blackAndWhiteinator(gaussianBlur(filename, blur), bw_threshold)
 
-def grayscaleinator(filename):
-    image = I.open(imgFilename) # Open with Pillow Image
-    image_arr = numpy.asarray(image) # Convert to numpy array
+def grayscaleinator(image_arr):
     height, width = image_arr.shape[:2]
 
-    # image_gray = numpy.zeros((height, width)) # create empty array composed of zero's
-    image_gray = numpy.zeros((height, width, 3)) # create empty array composed of zero's
+    image_gray = numpy.zeros((height, width)) # create empty array composed of zero's
     for i in range(height):
         for j in range(width):
-            # image_gray[i][j][1] = image_arr[i][j][1]
-            image_gray[i][j] = (numpy.multiply(image_arr[i][j][:3], [0.2989, 0.5870, 0.1140]))
-            # image_gray[i][j] = numpy.sum(numpy.multiply(image_arr[i][j][:3], [0.2989, 0.5870, 0.1140]))
-
-    # print(image_gray)
+            image_gray[i][j] = numpy.sum(numpy.multiply(image_arr[i][j][:3], [0.2989, 0.5870, 0.1140]))
     return image_gray
+
+def grayscaleinatorPil(image_arr): # if using Pillow
+    image = numpyarrToPilImg(image_arr)
+    return image.convert('L')
+
+def grayscaleGaussianBW(filename, blur=5, bw_threshold=128): # Grayscales the image, adds gaussian blur, then converts to b&w
+    image = I.open(filename).convert('L').filter(ImageFilter.GaussianBlur(blur)) # Open with Pillow Image and convert to grayscale
+    return blackAndWhiteinator(pilImgToNumpyarr(image), bw_threshold)
+
 
 
 imgFilename = 'test/koala.jpeg'
@@ -115,9 +133,13 @@ def measureTimeDiff(func1, func2): # pass the functions with lambda, eg lambda: 
     print("Algo 2: {:} ms".format(t*1000))
 
 # measureTimeDiff(lambda: gaussianBlurToBW(imgFilename, 3), lambda: blackAndWhiteinator(imgToNumpyarr(imgFilename)))
-# displayImage(gaussianBlur(imgFilename, 3))
-# displayImage(blackAndWhiteinator(imgFilename))
-displayImage(gaussianBlurToBW(imgFilename, 2, 150))
 
-# displayTwoImages(grayscaleinator(imgFilename), blackAndWhiteinator(imgFilename))
-# displayTwoImages(gaussianBlurToBW(imgFilename, 1), blackAndWhiteinator(imgToNumpyarr(imgFilename)))
+# displayImage(blackAndWhiteinator(imgToNumpyarr(imgFilename), bw_threshold=128))
+# displayImage(gaussianBlurToBW(imgFilename, blur=5, bw_threshold=128))
+# displayImage(grayscaleGaussianBW(imgFilename, blur=5, bw_threshold=150))
+
+# Immediate B&W vs Gaussian to B&W vs Grayscale to Gaussian to B&W
+displayMultipleImages(
+    blackAndWhiteinator(imgToNumpyarr(imgFilename), bw_threshold=128), 
+    gaussianBlurToBW(imgFilename, blur=5, bw_threshold=128), 
+    grayscaleGaussianBW(imgFilename, blur=5, bw_threshold=150)) #def thresh is 128, half of 255
