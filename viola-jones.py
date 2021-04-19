@@ -3,7 +3,7 @@
 import cv2 as cv
 
 # Read image from your local file system
-original_image = cv.imread('dataset\images\maksssksksss1.png')
+original_image = cv.imread('dataset/images/maksssksksss6.png')
 
 # Convert color image to grayscale for Viola-Jones
 grayscale_image = cv.cvtColor(original_image, cv.COLOR_BGR2GRAY)
