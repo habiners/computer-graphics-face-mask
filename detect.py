@@ -2,12 +2,14 @@ import numpy as np
 import cv2
 from Preprocessing import gaussianBlur, displayImage, grayscaleinator as gs, imgToNumpyarr
 
-
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 nose_cascade = cv2.CascadeClassifier('classifier/nose.xml')
 mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 
+
+
+ 
 class Detector:
     def getFaceData(self, name):
         # img = cv2.imread('dataset/images/maksssksksss0.png')

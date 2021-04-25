@@ -139,7 +139,8 @@ def measureTimeDiff(func1, func2): # pass the functions with lambda, eg lambda: 
 # displayImage(grayscaleGaussianBW(imgFilename, blur=5, bw_threshold=150))
 
 # Immediate B&W vs Gaussian to B&W vs Grayscale to Gaussian to B&W
-displayMultipleImages(
-    blackAndWhiteinator(imgToNumpyarr(imgFilename), bw_threshold=128), 
-    gaussianBlurToBW(imgFilename, blur=5, bw_threshold=128), 
-    grayscaleGaussianBW(imgFilename, blur=5, bw_threshold=150)) #def thresh is 128, half of 255
+# displayMultipleImages(
+#     blackAndWhiteinator(imgToNumpyarr(imgFilename), bw_threshold=128), 
+#     gaussianBlurToBW(imgFilename, blur=5, bw_threshold=128), 
+#     grayscaleGaussianBW(imgFilename, blur=5, bw_threshold=150))
+     #def thresh is 128, half of 255

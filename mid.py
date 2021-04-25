@@ -3,6 +3,8 @@ from PIL import Image, ImageOps
 import numpy as np
 from matplotlib import pyplot as P
 import Preprocessing as pre # mo run first tong unsa ang naa sa Preprocessing.py
+
+
 """
 This class uses canny edge detection under the hood
 
@@ -30,6 +32,9 @@ Gaussian blur is yet to be implemented manually (currently using packag idk if t
 BMP files when converted to numpy array only contains False as its cells' value. I commented the code that recreates this error below
 
 """
+
+
+
 
 class ImageEdge:
     def __init__(self, filename, blur = 1, low = 0.1, high = 0.2,weak_pixel = 75, strong_pixel = 255):
