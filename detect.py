@@ -59,29 +59,23 @@ mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 
 # """"
 
+
  
 class Detector:
-    def generateData(self, path):
+    def get_multiple_face_data(self, path, test=True):
         files = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))]
-        files = files[:3]
+        files = files[0:20]
         res = []
 
         for f in files:
-            data = self.getFaceData(path + '/' + f)
+            data = self.get_face_data(path + '/' + f, test)
 
             for d in data:
                 res.append(d)
 
+        return res
 
-        res = np.array(res)
-
-        # write into a file 
-        resultTxt = open("image_data.txt", "w")
-        np.set_printoptions(threshold=sys.maxsize)
-        resultTxt.write(res.tostring()) 
-        resultTxt.close()
-
-    def getFaceData(self, name):
+    def get_face_data(self, name, test=True):
         blurred = gaussianBlur(name, 2)
         gray = np.array(gs(blurred), dtype="uint8")
         (faces, level, score) = face_cascade.detectMultiScale3(gray, 1.1, 2, outputRejectLevels=True)
@@ -96,34 +90,33 @@ class Detector:
 
             cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
             roi = gray[y:y+h, x:x+w]
+            roi_color = img[y:y+h, x:x+w]
 
-            (eyes, iscore) = self._get_eyes(face, roi) 
-            (nose, nscore) = self._get_nose(face, roi, eyes)
-            (mouth, mscore) = self._get_mouth(face, roi, nose)
-
-            # displayImage(img)
-            # cv2.namedWindow('image',cv2.WINDOW_NORMAL)
-            cv2.imshow("image", img)
-            cv2.waitKey(1700)
-            cv2.destroyAllWindows()
-
-            tag = input("Wearing facemask? (1/0): ")
-
+            (eyes, iscore) = self._get_eyes(face, roi, roi_color) 
+            (nose, nscore) = self._get_nose(face, roi, roi_color, eyes)
+            (mouth, mscore) = self._get_mouth(face, roi, roi_color)
+            
             obj['face'] = score[index][0] # normalize before iassign ngari
-            obj['eyes'] = iscore # normalize before iassign ngari
+            obj['eye1'] = iscore[0] # normalize before iassign ngari
+            obj['eye2'] = iscore[1] # normalize before iassign ngari
             obj['nose'] = nscore # normalize before iassign ngari
             obj['mouth'] = mscore # normalize before iassign ngari
-            obj['name'] = name
-            obj['box'] = [x, y, w, h]
-            obj['tag'] = tag
+
+            if test == True:
+                cv2.imshow("image", img)
+                cv2.waitKey(1200)
+                cv2.destroyAllWindows()
+                tag = input("Wearing facemask? (1/0): ")
+                obj['name'] = name
+                obj['box'] = [x, y, w, h]
+                obj['tag'] = tag
 
             res.append(obj)
 
         return res
 
     # private
-    def _get_eyes(self, face, roi, threshold=5):
-        (x, y, w, h) = face
+    def _get_eyes(self, face, roi, image, threshold=5):
         (eyes, level, score) = eye_cascade.detectMultiScale3(roi, 1.05, threshold, outputRejectLevels=True)
 
         second_highest = highest = roi.shape[1]
@@ -131,63 +124,91 @@ class Detector:
 
         num_eyes = len(eyes)
 
-
         for index in range(num_eyes):
             eye = eyes[index]
             (x, y, w, h) = eye
 
             if y < highest:
-                best = index
+                second_highest = highest
+                second_best = best
                 highest = y
+                best = index
             elif y < second_highest:
                 second_highest = y
                 second_best = index
         
-        if num_eyes > 1:
-            return ([eyes[best], eyes[second_best]], [score[best], score[second_best]])
+        for index in range(num_eyes):
+            if index == best or index == second_best:
+                (x, y, w, h) = eyes[index]
+                cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),2)
         
-        return (None, 0)
+        to_return = [[None, None], [0,0]]
 
-    def _get_nose(self, face, roi, eyes=None, threshold=5):
-        (x, y, w, h) = face
+        to_return[0][0] = eyes[best] if not best is None else None
+        to_return[1][0] = score[best] if not best is None else 0
+        to_return[0][1] = eyes[second_best] if not second_best is None else None
+        to_return[1][1] = score[second_best] if not second_best is None else 0
+
+        return to_return
+
+    def _get_nose(self, face, roi, image, eyes=None, threshold=5):
         best_nose = None
         (nose, level, score) = nose_cascade.detectMultiScale3(roi, 1.05, threshold, outputRejectLevels=True)
 
         if len(nose) > 0:
-            eye_mid = eyes[1][1] + (eyes[1][3] / 2) if not eyes is None else (y + h) / 2
+            mid = roi.shape[1] / 2
             nose_diff = 10000
+            iy = eyes[0][1] if not eyes[0] is None else 0
             
             for index in range(len(nose)):
                 (ex,ey,ew,eh) = nose[index]
-                diff = abs(ey - eye_mid)
-                if diff < nose_diff:
-                    best_nose = (nose[index], index)
-            
-
+                diff = abs(ey - mid)
+                if diff < nose_diff and ey > iy:
+                    best_nose = index
         
-        return best_nose if not best_nose is None else (None, 0)
+        score = list(map(lambda a: a[0], score))
+
+        if not best_nose is None:
+            (x, y, w, h) = nose[best_nose]
+            cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),2)
+            return (nose[best_nose], score[best_nose])
+
+        return (None, 0)
     
-    def _get_mouth(self, face, roi, nose=None, threshold=5):
-        (x, y, w, h) = face
+    def _get_mouth(self, face, roi, image, nose=None, threshold=5):
         best_mouth = None
         (mouth, level, score) = mouth_cascade.detectMultiScale3(roi, 1.05, threshold, outputRejectLevels=True)
+        
         if len(mouth) > 0:
-            nose_mid = nose[1] + (nose[3] / 2) if not nose is None else (y + h) / 2
-            mouth_diff = 10000
+            mid = roi.shape[1] / 2
+            mouth_diff = 0
 
             for index in range(len(mouth)):
                 (ex,ey,ew,eh) = mouth[index]
-                if ey > nose_mid:
-                    diff = abs(ey - nose_mid)
-                    if diff < mouth_diff:
-                        best_mouth = (mouth[index], index)
+                if ey > mid:
+                    diff = abs(ey - mid)
+                    if diff > mouth_diff:
+                        best_mouth = index
         
-        return best_mouth if not best_mouth is None else (None, 0)
+        score = list(map(lambda a: a[0], score))
+        
+        if not best_mouth is None:
+            (x, y, w, h) = mouth[best_mouth]
+            cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,0),2)
+            return (mouth[best_mouth], score[best_mouth])
+
+        return (None, 0)
 
 
 
 test = Detector()
-print(test.generateData('dataset/images'))
+res = test.get_multiple_face_data('dataset/images')
+
+# write
+resultTxt = open("image_data.txt", "w")
+np.set_printoptions(threshold=sys.maxsize)
+resultTxt.write(res.__repr__()) 
+resultTxt.close()
 
 
 
@@ -195,6 +216,8 @@ print(test.generateData('dataset/images'))
 
 
 
+            # mid = eyes[1][1] + (eyes[1][3] / 2) if not eyes[1] is None else (y + h) / 2
+            # nose_mid = nose[1] + (nose[3] / 2) if not nose is None else (y + h) / 2
 
 
         # res = {}
@@ -244,12 +267,12 @@ print(test.generateData('dataset/images'))
     #                 cv2.rectangle(roi,(x,y),(x+w,y+h),(0,255,0),2)
 
     #         if not face["nose"] is None:
-    #             (x, y, w, h) = face["nose"]
-    #             cv2.rectangle(roi,(x,y),(x+w,y+h),(0,0,255),2)
+                # (x, y, w, h) = face["nose"]
+                # cv2.rectangle(roi,(x,y),(x+w,y+h),(0,0,255),2)
 
     #         if not face["mouth"] is None:
-    #             (x, y, w, h) = face["mouth"]
-    #             cv2.rectangle(roi,(x,y),(x+w,y+h),(0,0,0),2)
+                # (x, y, w, h) = face["mouth"]
+                # cv2.rectangle(roi,(x,y),(x+w,y+h),(0,0,0),2)
 
     #     displayImage(img)  
 
