@@ -65,7 +65,7 @@ mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 class Detector:
     def get_multiple_face_data(self, path, test=True):
         files = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))]
-        # files = files[0:3] for test csv
+        # files = files[0:3]
         res = []
 
         for f in files:
@@ -93,15 +93,15 @@ class Detector:
             roi = gray[y:y+h, x:x+w]
             roi_color = img[y:y+h, x:x+w]
 
-            (eyes, iscore) = self._get_eyes(face, roi, roi_color) 
-            (nose, nscore) = self._get_nose(face, roi, roi_color, eyes)
+            (eye1, eye2, iscore1, iscore2) = self._get_eyes(face, roi, roi_color) 
+            (nose, nscore) = self._get_nose(face, roi, roi_color, [eye1, eye2])
             (mouth, mscore) = self._get_mouth(face, roi, roi_color)
             
-            obj['face'] = score[index][0] # normalize before iassign ngari
-            obj['eye1'] = iscore[0] # normalize before iassign ngari
-            obj['eye2'] = iscore[1] # normalize before iassign ngari
-            obj['nose'] = nscore # normalize before iassign ngari
-            obj['mouth'] = mscore # normalize before iassign ngari
+            obj['face'] = score[index][0]
+            obj['eye1'] = iscore1
+            obj['eye2'] = iscore2
+            obj['nose'] = nscore
+            obj['mouth'] = mscore
 
             if test == True:
                 cv2.imshow("image", img)
@@ -142,13 +142,15 @@ class Detector:
             if index == best or index == second_best:
                 (x, y, w, h) = eyes[index]
                 cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),2)
-        
-        to_return = [[None, None], [0,0]]
 
-        to_return[0][0] = eyes[best] if not best is None else None
-        to_return[1][0] = score[best] if not best is None else 0
-        to_return[0][1] = eyes[second_best] if not second_best is None else None
-        to_return[1][1] = score[second_best] if not second_best is None else 0
+        score = list(map(lambda a: a[0], score))
+
+        to_return = [None, None, 0,0]
+
+        to_return[0] = eyes[best] if not best is None else None
+        to_return[1] = eyes[second_best] if not second_best is None else None
+        to_return[2] = score[best] if not best is None else 0
+        to_return[3] = score[second_best] if not second_best is None else 0
 
         return to_return
 
