@@ -3,6 +3,7 @@ import cv2
 from Preprocessing import gaussianBlur, displayImage, grayscaleinator as gs, imgToNumpyarr
 import os
 import sys
+import csv
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
@@ -64,7 +65,7 @@ mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 class Detector:
     def get_multiple_face_data(self, path, test=True):
         files = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))]
-        #files = files[0:20]
+        files = files[0:3]
         res = []
 
         for f in files:
@@ -205,13 +206,17 @@ test = Detector()
 res = test.get_multiple_face_data('dataset/images')
 
 # write
-resultTxt = open("image_data.txt", "w")
 np.set_printoptions(threshold=sys.maxsize)
-resultTxt.write(res.__repr__()) 
-resultTxt.close()
-
-
-
+csv_columns = ['face','eye1','eye2','nose','mouth','name','box', 'tag']
+csv_file = "result.csv"
+try:
+    with open(csv_file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+        writer.writeheader()
+        for data in res:
+            writer.writerow(data)
+except IOError:
+    print("I/O error")
 
 
 
