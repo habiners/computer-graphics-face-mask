@@ -65,7 +65,7 @@ mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 class Detector:
     def get_multiple_face_data(self, path, test=True):
         files = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))]
-        files = files[0:3]
+        # files = files[0:3] for test csv
         res = []
 
         for f in files:
