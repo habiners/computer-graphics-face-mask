@@ -1,8 +1,16 @@
 import pandas as pd
 import numpy as np
 
+# Importing the dataset
 df = pd.read_csv('new_normalized.csv')
 print(df.head())
+
+X = df.iloc[:, :5].values
+y = df.iloc[:, 7].values
+
+print(X)
+print(y)
+
 
 def sigmoid(z):
 	return 1/(1 + np.exp(-z))
