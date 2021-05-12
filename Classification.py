@@ -1,8 +1,20 @@
 import pandas as pd
 import numpy as np
 
+# Importing the dataset
 df = pd.read_csv('new_normalized.csv')
 print(df.head())
+
+X = df.iloc[:, :5].values
+y = df.iloc[:, 7].values
+
+print(X)
+print(y)
+
+# Splitting the dataset into Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, random_state = 0)
+print(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test))
 
 def sigmoid(z):
 	return 1/(1 + np.exp(-z))
