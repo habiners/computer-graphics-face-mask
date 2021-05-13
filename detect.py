@@ -107,7 +107,24 @@ class Detector:
                 cv2.imshow("image", img)
                 cv2.waitKey(1200)
                 cv2.destroyAllWindows()
-                tag = input("Wearing facemask? (1/0): ")
+
+                while True:
+                    isFace = int(input("\nIs it a face? (1/0): "))
+                    
+                    if isFace == 1:
+                        tag = int(input("Wearing facemask? (1/0): "))
+
+                        if tag != 1 and tag != 0:
+                            print("Invalid input")
+                        else:
+                            break
+                            
+                    elif isFace == 0:
+                        tag = 0
+                        break
+                    else:
+                        print("Invalid input")
+
                 obj['name'] = name
                 obj['box'] = [x, y, w, h]
                 obj['tag'] = tag
@@ -210,7 +227,7 @@ res = test.get_multiple_face_data('dataset/images')
 # write
 np.set_printoptions(threshold=sys.maxsize)
 csv_columns = ['face','eye1','eye2','nose','mouth','name','box', 'tag']
-csv_file = "result.csv"
+csv_file = "resultz.csv"
 try:
     with open(csv_file, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
