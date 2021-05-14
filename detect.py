@@ -65,6 +65,7 @@ mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 class Detector:
     def get_multiple_face_data(self, path, test=True):
         files = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))]
+        files = files[:217]
         res = []
 
         for f in files:
@@ -123,7 +124,7 @@ class Detector:
                         break
                     else:
                         print("Invalid input")
-
+                obj['isFace'] = isFace
                 obj['name'] = name
                 obj['box'] = [x, y, w, h]
                 obj['tag'] = int(tag)
@@ -226,8 +227,8 @@ res = test.get_multiple_face_data('dataset/images')
 
 # write
 np.set_printoptions(threshold=sys.maxsize)
-csv_columns = ['face','eye1','eye2','nose','mouth','name','box', 'tag']
-csv_file = "resultz.csv"
+csv_columns = ['face','eye1','eye2','nose','mouth','name','box', 'tag', 'isFace']
+csv_file = "new_results.csv"
 try:
     with open(csv_file, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
