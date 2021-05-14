@@ -1,7 +1,7 @@
 from sklearn import preprocessing
 import pandas as pd
 
-first_csv = pd.read_csv("result.csv")
+first_csv = pd.read_csv("results.csv")
 scaler = preprocessing.MinMaxScaler(feature_range=(-1, 1))
 names = first_csv.columns
 d = scaler.fit_transform(first_csv)
