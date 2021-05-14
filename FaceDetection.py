@@ -6,10 +6,8 @@ import pickle
 df = pd.read_csv('new_results.csv')
 print(df.head())
 
-df = df[df["isFace"] == 1]
-
 X = df.iloc[:, :5].values
-y = df.iloc[:, 7].values
+y = df.iloc[:, 8].values
 
 print(X)
 print(y)
@@ -42,6 +40,3 @@ print(predictions)
 testing = model.predict(X_test[:, 1])
 print(testing)
 print(y_test[:, 1])
-
-with open('FaceMaskModel', 'wb') as f:
-    pickle.dump(model, f)

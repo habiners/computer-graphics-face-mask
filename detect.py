@@ -103,32 +103,32 @@ class Detector:
             obj['nose'] = nscore
             obj['mouth'] = mscore
 
-            if test == True:
-                cv2.imshow("image", img)
-                cv2.waitKey(1200)
-                cv2.destroyAllWindows()
+            # if test == True:
+            #     cv2.imshow("image", img)
+            #     cv2.waitKey(1200)
+            #     cv2.destroyAllWindows()
 
-                while True:
-                    isFace = input("\nIs it a face? (1/0): ")
+            #     while True:
+            #         isFace = input("\nIs it a face? (1/0): ")
                     
-                    if isFace == '1':
-                        tag = input("Wearing facemask? (1/0): ")
+            #         if isFace == '1':
+            #             tag = input("Wearing facemask? (1/0): ")
 
-                        if tag != '1' and tag != '0':
-                            print("Invalid input")
-                        else:
-                            break
+            #             if tag != '1' and tag != '0':
+            #                 print("Invalid input")
+            #             else:
+            #                 break
                             
-                    elif isFace == '0':
-                        tag = 0
-                        break
-                    else:
-                        print("Invalid input")
-                obj['isFace'] = isFace
-                obj['name'] = name
-                obj['box'] = [x, y, w, h]
-                obj['tag'] = int(tag)
-                obj['isFace'] = int(isFace)
+            #         elif isFace == '0':
+            #             tag = 0
+            #             break
+            #         else:
+            #             print("Invalid input")
+            #     obj['isFace'] = isFace
+            #     obj['name'] = name
+            #     obj['box'] = [x, y, w, h]
+            #     obj['tag'] = int(tag)
+            #     obj['isFace'] = int(isFace)
 
             res.append(obj)
 
@@ -222,21 +222,21 @@ class Detector:
 
 
 
-test = Detector()
-res = test.get_multiple_face_data('dataset/images')
+# test = Detector()
+# res = test.get_multiple_face_data('dataset/images')
 
-# write
-np.set_printoptions(threshold=sys.maxsize)
-csv_columns = ['face','eye1','eye2','nose','mouth','name','box', 'tag', 'isFace']
-csv_file = "new_results.csv"
-try:
-    with open(csv_file, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-        writer.writeheader()
-        for data in res:
-            writer.writerow(data)
-except IOError:
-    print("I/O error")
+# # write
+# np.set_printoptions(threshold=sys.maxsize)
+# csv_columns = ['face','eye1','eye2','nose','mouth','name','box', 'tag', 'isFace']
+# csv_file = "new_results.csv"
+# try:
+#     with open(csv_file, 'w') as csvfile:
+#         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+#         writer.writeheader()
+#         for data in res:
+#             writer.writerow(data)
+# except IOError:
+#     print("I/O error")
 
 
 
