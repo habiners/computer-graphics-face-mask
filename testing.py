@@ -21,25 +21,9 @@ X_test = X_test.T
 y_test = y_test.reshape(1, X_test.shape[1])
 print(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test))
 
+with open('test1', 'rb') as f:
+    model = pickle.load(f)
 
-from logistic_regression import LogisticRegression
-model = LogisticRegression(lr=0.1, epochs=20000)
-model.fit(X_train, y_train)
-predictions = model.predict(X_test)
-
-def accuracy(y_true, y_pred):
-    # accuracy = np.sum(y_true == y_pred) / len(y_true)
-    accuracy = (1 - np.sum(np.abs(y_pred - y_true)) / y_true.shape[1]) * 100
-    return accuracy
-
-print("Accuracy: ", accuracy(y_test, predictions))
-
-print(y_test)
-print(predictions)
-
-testing = model.predict(X_test[:, 1])
-print(testing)
+pred = model.predict(X_test[:, 1])
+print(pred)
 print(y_test[:, 1])
-
-# with open('test1', 'wb') as f:
-#     pickle.dump(model, f)
