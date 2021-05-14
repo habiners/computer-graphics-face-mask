@@ -65,7 +65,6 @@ mouth_cascade = cv2.CascadeClassifier('classifier/mouth.xml')
 class Detector:
     def get_multiple_face_data(self, path, test=True):
         files = [f for f in os.listdir(path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))]
-        # files = files[0:3]
         res = []
 
         for f in files:
@@ -109,17 +108,17 @@ class Detector:
                 cv2.destroyAllWindows()
 
                 while True:
-                    isFace = int(input("\nIs it a face? (1/0): "))
+                    isFace = input("\nIs it a face? (1/0): ")
                     
-                    if isFace == 1:
-                        tag = int(input("Wearing facemask? (1/0): "))
+                    if isFace == '1':
+                        tag = input("Wearing facemask? (1/0): ")
 
-                        if tag != 1 and tag != 0:
+                        if tag != '1' and tag != '0':
                             print("Invalid input")
                         else:
                             break
                             
-                    elif isFace == 0:
+                    elif isFace == '0':
                         tag = 0
                         break
                     else:
@@ -127,7 +126,8 @@ class Detector:
 
                 obj['name'] = name
                 obj['box'] = [x, y, w, h]
-                obj['tag'] = tag
+                obj['tag'] = int(tag)
+                obj['isFace'] = int(isFace)
 
             res.append(obj)
 
