@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ImagePickerConf } from 'ngp-image-picker';
 
 @Component({
   selector: 'app-main',
@@ -11,5 +12,14 @@ export class MainComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
+  onSelectFile(event: any) {
+    if (event.target.files && event.target.files[0]) {
+      var reader = new FileReader();
+      // reader.onload = (event: any) => {
+      //     this.localUrl = event.target.result;
+      // }
+      reader.readAsDataURL(event.target.files[0]);
+      console.log(reader)
+  }
+  }
 }
