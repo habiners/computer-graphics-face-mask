@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "D:\\Apps\\Anaconda\\envs\\tfenv\\python.exe",
+    "python.pythonPath": "C:\\Users\\Javin\\anaconda3\\python.exe",
     "python.analysis.extraPaths": ["./sources"]
 }
