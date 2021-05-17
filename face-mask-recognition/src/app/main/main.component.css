@@ -3,7 +3,15 @@
     padding: 0;
 }
 
-.body1 {
+.input {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 80vh;
+    background-color: white;
+}
+
+.input_body {
     display: block;
 }
 .header {
