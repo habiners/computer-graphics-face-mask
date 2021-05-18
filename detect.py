@@ -140,8 +140,11 @@ class Detector:
         (faces, level, score) = face_cascade.detectMultiScale3(gray, 1.1, 2, outputRejectLevels=True)
 
         res = []
-        # img = cv2.imread(name, cv2.IMREAD_COLOR)
         img = np_arr.copy()
+
+        # Swapped since np uses RGB while cv2 uses BGR, followed orig implementation
+        img[:,:,0] = np_arr.copy()[:,:,2]
+        img[:,:,2] = np_arr.copy()[:,:,0]
 
         for index in range(len(faces)):
             obj = {}
@@ -166,7 +169,6 @@ class Detector:
 
         return res
 
-    # private
     def _get_eyes(self, face, roi, image, threshold=5):
         (eyes, level, score) = eye_cascade.detectMultiScale3(roi, 1.05, threshold, outputRejectLevels=True)
 
