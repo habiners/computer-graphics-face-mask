@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from Preprocessing import gaussianBlur, displayImage, grayscaleinator as gs, imgToNumpyarr
+from Preprocessing import gaussianBlur, gaussianBlurArr, displayImage, grayscaleinator as gs, imgToNumpyarr
 import os
 import sys
 import csv
@@ -134,7 +134,41 @@ class Detector:
 
         return res
 
-    # private
+    def get_face_data_arr(self, np_arr, test=True):
+        blurred = gaussianBlurArr(np_arr, 2)
+        gray = np.array(gs(blurred), dtype="uint8")
+        (faces, level, score) = face_cascade.detectMultiScale3(gray, 1.1, 2, outputRejectLevels=True)
+
+        res = []
+        img = np_arr.copy()
+
+        # Swapped since np uses RGB while cv2 uses BGR, followed orig implementation
+        img[:,:,0] = np_arr.copy()[:,:,2]
+        img[:,:,2] = np_arr.copy()[:,:,0]
+
+        for index in range(len(faces)):
+            obj = {}
+            face = faces[index]
+            (x, y, w, h) = face
+
+            cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+            roi = gray[y:y+h, x:x+w]
+            roi_color = img[y:y+h, x:x+w]
+
+            (eye1, eye2, iscore1, iscore2) = self._get_eyes(face, roi, roi_color) 
+            (nose, nscore) = self._get_nose(face, roi, roi_color, [eye1, eye2])
+            (mouth, mscore) = self._get_mouth(face, roi, roi_color)
+            
+            obj['face'] = score[index][0]
+            obj['eye1'] = iscore1
+            obj['eye2'] = iscore2
+            obj['nose'] = nscore
+            obj['mouth'] = mscore
+
+            res.append(obj)
+
+        return res
+
     def _get_eyes(self, face, roi, image, threshold=5):
         (eyes, level, score) = eye_cascade.detectMultiScale3(roi, 1.05, threshold, outputRejectLevels=True)
 
