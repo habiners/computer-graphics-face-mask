@@ -3,7 +3,7 @@
     padding: 0;
 }
 
-.input {
+.body {
     margin: 0;
     padding: 0;
     width: 100vw;
@@ -11,9 +11,41 @@
     background-color: white;
 }
 
-.input_body {
+.input-left {
+    display: inline-block;
+    height: 80vh;
+    width: 40vw;
+    background-color: black;
+}
+.input-image {
+    height: 50vh;
+    width: 25vw;
+    background-color: grey;
     display: block;
 }
+
+.input-file {
+    display: block;
+}
+
+.input-submit {
+    display:block;
+}
+
+.body-middle {
+    display: inline-block;
+    height: 80vh;
+    width: 20vw;
+    background-color: blue;
+}
+
+.output-right {
+    display: inline-block;
+    height: 80vh;
+    width: 40vw;
+    background-color: red;
+}
+
 .header {
     margin: 0;
     padding: 0;

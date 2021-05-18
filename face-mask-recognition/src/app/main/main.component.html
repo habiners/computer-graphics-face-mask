@@ -2,7 +2,11 @@
     <p class = "title">FACE MASKU</p>
 </div>
 <div class = "body">
-    <img [src] = "imgUrl" class = "body1">
-    <input id="fileInput" type='file' (change)="onSelectFile($event)" class = "body1">
+    <div class = "input-left">
+        <img [src] = "imgUrl" class = "input-image">
+        <input id="fileInput" type='file' (change)="onSelectFile($event)" class = "input-file">
+    </div>
+    <div class = "body-middle"></div>
+    <div class = "output-right"></div>
     <input type="button" value="submit" (click)="yeet()">
 </div>
