@@ -29,10 +29,10 @@ for x in scores:
 
 print(result)
 
-def mask_detector(filename):
+def mask_detector(np_arr):
     # testimage = 'testdata/testdata1.jpg'
     dt = Detector()
-    pp = dt.get_face_data(filename, False)
+    pp = dt.get_face_data_arr(np_arr, False)
 
     scores = []
     for face in pp:
