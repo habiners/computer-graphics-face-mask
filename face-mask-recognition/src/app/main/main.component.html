@@ -3,10 +3,16 @@
 </div>
 <div class = "body">
     <div class = "input-left">
-        <img [src] = "imgUrl" class = "input-image">
-        <input id="fileInput" type='file' (change)="onSelectFile($event)" class = "input-file">
+        <div class="left-wrapper">
+            <img [src] = "imgUrl" class = "input-image">
+            <label for = "fileInput" class = "input-file">Upload an image</label>
+            <input id="fileInput" type='file' (change)="onSelectFile($event)" accept="image/*">
+            <input if="submitInput" type="button" value="Analyze" (click)="analyze()" [disabled] = "disableAnalyze" [style.background-color] = "buttonColor" [style.cursor] = "buttonCursor" (mouseover) = "setSubmitStyle(true)" (mouseleave) = "setSubmitStyle(false)">
+        </div>
     </div>
-    <div class = "body-middle"></div>
-    <div class = "output-right"></div>
-    <input type="button" value="submit" (click)="yeet()">
+    <div class = "output-right">
+        <div class = "right-wrapper">
+            <img [src] = "resultImgUrl" class = "output-image" [style.border-color] = "outputBorderColor">
+        </div>
+    </div>
 </div>
