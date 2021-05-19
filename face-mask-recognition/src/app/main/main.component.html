@@ -2,7 +2,17 @@
     <p class = "title">FACE MASKU</p>
 </div>
 <div class = "body">
-    <img [src] = "imgUrl" class = "body1">
-    <input id="fileInput" type='file' (change)="onSelectFile($event)" class = "body1">
-    <input type="button" value="submit" (click)="yeet()">
+    <div class = "input-left">
+        <div class="left-wrapper">
+            <img [src] = "imgUrl" class = "input-image">
+            <label for = "fileInput" class = "input-file">Upload an image</label>
+            <input id="fileInput" type='file' (change)="onSelectFile($event)" accept="image/*">
+            <input if="submitInput" type="button" value="Analyze" (click)="analyze()" [disabled] = "disableAnalyze" [style.background-color] = "buttonColor" [style.cursor] = "buttonCursor" (mouseover) = "setSubmitStyle(true)" (mouseleave) = "setSubmitStyle(false)">
+        </div>
+    </div>
+    <div class = "output-right">
+        <div class = "right-wrapper">
+            <img [src] = "resultImgUrl" class = "output-image" [style.border-color] = "outputBorderColor">
+        </div>
+    </div>
 </div>
